@@ -1,12 +1,11 @@
 ;;; shelisp.el --- execute elisp in shell          -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2018, 2019  Michael R. Mauger
+;; Copyright (C) 2018-2019  Free Software Foundation, Inc.
 
 ;; Author: Michael R. Mauger <michael@mauger.com>
-;; Version: 0.9.0
+;; Version: 0.9.1
 ;; Package-Type: simple
 ;; Keywords: terminals, lisp, processes
-;; URL: https://gitlab.com/mmauger/shelisp
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -60,6 +59,10 @@
 
 ;; TO DOs:
 
+;; * Provide a security feature that prompts the Emacs user to approve
+;; * the execution of any elisp expressions submitted thru the shelisp
+;; * escape sequence.
+
 ;; * Support `term-mode' like `shell-mode'
 
 ;; * Provide support for creation of shell commands for command shells
@@ -85,7 +88,7 @@
 ;; the purpose is to create a valid elisp expression string.
 
 ;;; Code:
-(require 'cl-macs)
+(require 'cl-lib)
 (require 'pp)
 
 ;;;###autoload
@@ -150,7 +153,8 @@ convert it to a string."
                       (condition-case err
                           (shelisp--result-as-string
                            (eval `(cl-flet ((f (file) (shelisp--file-name file)))
-	                            ,(read cmd))))
+	                            ,(read cmd))
+                                 t))
                         ;; When an error occurs, replace with the error message
 	                (error
 	                 (format "shelisp: `%s': %S" cmd err)))))
